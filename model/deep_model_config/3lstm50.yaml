@@ -1,0 +1,9 @@
+lstm:
+  lstm_0:
+    units: 50
+    return_sequences: True
+  lstm_1:
+    units: 50
+    return_sequences: True
+  lstm_2:
+    units: 50

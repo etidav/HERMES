@@ -1,0 +1,7 @@
+window: 104
+horizon: 52
+seasonality: 52
+main_signal: [trends]
+
+weak_signals:
+  temporal: [ratio_fashion_forwards]
