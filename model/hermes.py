@@ -656,8 +656,8 @@ class hermes(tf.keras.Model):
             if metric == "mase":
                 denominator = np.mean(
                     np.abs(
-                        histo_ground_truth.values[self.season :]
-                        - histo_ground_truth.values[: -self.season]
+                        histo_ground_truth.values[self.seasonality :]
+                        - histo_ground_truth.values[: -self.seasonality]
                     ),
                     axis=0,
                 )
