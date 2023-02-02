@@ -5,15 +5,15 @@ import os
 import pandas as pd
 import copy
 from typing import List, Dict, Tuple
-from utils import (
+from tqdm import tqdm
+from model.utils import (
     read_json,
     read_yaml,
     write_yaml,
-    tqdm,
 )
 
-from stat_layer import Statlayer
-from rnn_layer import name_to_archi
+from model.stat_layer import Statlayer
+from model.rnn_layer import name_to_archi
 
 random.seed(42)
 
@@ -137,8 +137,8 @@ class hermes(tf.keras.Model):
                 tf.math.reduce_mean(
                     self.make_moving_windows(
                         trends=inputs["trends"],
-                        window_size=self.window,
-                        horizon_size=self.horizon,
+                        window=self.window,
+                        horizon=self.horizon,
                     ),
                     axis=1,
                 ),
@@ -148,8 +148,8 @@ class hermes(tf.keras.Model):
                 if cont_input == "trends":
                     input_window = self.make_moving_windows(
                         trends=values_X,
-                        window_size=self.window,
-                        horizon_size=self.horizon,
+                        window=self.window,
+                        horizon=self.horizon,
                     )
 
                     stat_preds = self.stat_model(inputs)
@@ -168,8 +168,8 @@ class hermes(tf.keras.Model):
                 else:
                     input_window = self.make_moving_windows(
                         trends=inputs[cont_input],
-                        window_size=self.window,
-                        horizon_size=self.horizon,
+                        window=self.window,
+                        horizon=self.horizon,
                     )
 
                     input_windows[cont_input] = tf.expand_dims(input_window, axis=-1)
@@ -182,8 +182,8 @@ class hermes(tf.keras.Model):
             model_pred = tf.math.add(pred_windows_rescaled, stat_preds)
             y_true = self.make_moving_windows(
                 trends=inputs["trends"][:, self.window :],
-                window_size=self.horizon,
-                horizon_size=0,
+                window=self.horizon,
+                horizon=0,
             )
             err_deep = tf.math.reduce_sum(
                 tf.math.abs(tf.math.add(y_true, -model_pred)), axis=1
@@ -279,7 +279,6 @@ class hermes(tf.keras.Model):
         inputs, trends_idx = self.sequences_to_model_inputs(
             y_signal_train,
             external_signal_train,
-            self.input_model_config,
             tf_dataset=False,
         )
 
@@ -333,10 +332,10 @@ class hermes(tf.keras.Model):
         trends_idx = pd.DataFrame(
             range(len(y_signal.columns)), index=y_signal.columns, columns=["batch_idx"],
         )
-
+        list_trends_name = list(y_signal.columns).copy()
+        
         if tf_dataset:
 
-            list_trends_name = list(y_signal.columns).copy()
             random.shuffle(list_trends_name)
 
             all_inputs["trends"] = tf.data.Dataset.from_tensor_slices(
@@ -353,6 +352,7 @@ class hermes(tf.keras.Model):
                         ratio_fashion_forwards = external_signal / (
                             y_signal + external_signal
                         )
+                        ratio_fashion_forwards = ratio_fashion_forwards.fillna(0.5)
                         all_inputs[key] = tf.data.Dataset.from_tensor_slices(
                             ratio_fashion_forwards[list_trends_name].values.T.astype(
                                 "float32"
@@ -373,6 +373,7 @@ class hermes(tf.keras.Model):
                         ratio_fashion_forwards = external_signal / (
                             y_signal + external_signal
                         )
+                        ratio_fashion_forwards = ratio_fashion_forwards.fillna(0.5)
                         all_inputs[key] = ratio_fashion_forwards.values.T.astype(
                             "float32"
                         )
@@ -402,7 +403,7 @@ class hermes(tf.keras.Model):
             for i in range(trends.shape[1] - window - horizon + 1)
         ]
 
-        moving_windows = tf.concat(windowed_trends, axis=0)
+        moving_windows = tf.concat(moving_windows, axis=0)
         return moving_windows
 
     @tf.function
@@ -643,8 +644,9 @@ class hermes(tf.keras.Model):
         - *model_eval*: a dict containing the metrics values
        """
         time_split = prediction.index[0]
-        ground_truth = data.loc[time_split:].iloc[: self.horizon]
-        histo_ground_truth = data.loc[:time_split].iloc[:-1]
+        histo_ground_truth = ground_truth.loc[:time_split].iloc[:-1]
+        ground_truth = ground_truth.loc[time_split:].iloc[: self.horizon]
+        
 
         if type(metrics) == str:
             metrics = [metrics]

@@ -1,11 +1,6 @@
 import json
 import pickle
-import tqdm as _tqdm
 import yaml
-
-
-def tqdm(x, **kwargs):
-    return _tqdm.tqdm(x, disable=logger.tqdm_disable, **kwargs)
 
 
 def warn_unparsed(_dict, parsed_keys, config_file):

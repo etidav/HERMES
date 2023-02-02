@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-from utils import read_yaml
+from model.utils import read_yaml
 from typing import List, Dict, Tuple
 
 
@@ -82,7 +82,7 @@ class ContLSTM(RNNlayer):
         """
         self._lstm_layers = [v for k, v in option_dict["lstm"].items()]
 
-    def build(self, layer_name_to_shape: Dict) -> Tuple(tf.keras.Model, List):
+    def build(self, layer_name_to_shape: Dict) -> Tuple:
         """
         Build the RNN layer
         

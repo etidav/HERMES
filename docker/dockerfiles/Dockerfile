@@ -22,6 +22,13 @@ COPY docker/requirements/requirements.txt /requirements.txt
 RUN pip3 install -r /requirements.txt && \
     rm /requirements.txt
 
+# Make data and libs accressible
+COPY data /hermes/data
+COPY run /hermes/run
+COPY model /hermes/model
+RUN mkdir -p /hermes/result
+ENV PYTHONPATH=$PYTHONPATH:/hermes
+
 # Define workdir
 WORKDIR /hermes
 
