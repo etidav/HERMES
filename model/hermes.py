@@ -271,9 +271,11 @@ class hermes(tf.keras.Model):
 
         if stat_model is not None:
             self.stat_model.stat_model = stat_model
+            
+        processes=os.cpu_count() - 2
 
         if not self.stat_model.check_integrity(y_signal_train, train=False):
-            self.stat_model.fit(y_signal_train, train=False, processes=10)
+            self.stat_model.fit(y_signal_train, train=False, processes=processes)
         self.stat_model.compute_prediction(y_signal_train, train=False)
 
         inputs, trends_idx = self.sequences_to_model_inputs(
@@ -525,7 +527,7 @@ class hermes(tf.keras.Model):
                 val_size=val_size,
                 nb_window=nb_window,
                 train=True,
-                processes=10,
+                processes=processes,
             )
         self.stat_model.compute_prediction(
             y_signal, val_size=val_size, nb_window=nb_window, train=True

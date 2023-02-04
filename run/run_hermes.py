@@ -16,12 +16,12 @@ def main():
         "--model_dir_tag", type=str, help="Name of the directory where the model will be store", required=True
     )
     args = parser.parse_args()
-    
     gpus = tf.config.list_physical_devices('GPU')
-    tf.config.set_visible_devices(gpus[0], 'GPU')
-    tf.config.set_logical_device_configuration(
-                    gpus[0], [tf.config.LogicalDeviceConfiguration(memory_limit=7500)]
-                )
+    if len(gpus):
+        tf.config.set_visible_devices(gpus[0], 'GPU')
+        tf.config.set_logical_device_configuration(
+                        gpus[0], [tf.config.LogicalDeviceConfiguration(memory_limit=7500)]
+                    )
     os.environ['PYTHONHASHSEED']=str(42)
     os.environ['TF_CUDNN_DETERMINISTIC'] = '1'
     np.random.seed(42)
