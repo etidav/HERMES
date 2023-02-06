@@ -522,6 +522,7 @@ class hermes(tf.keras.Model):
         if not self.stat_model.check_integrity(
             y_signal, val_size=val_size, nb_window=nb_window, train=True
         ):
+            processes=os.cpu_count() - 2
             self.stat_model.fit(
                 y_signal,
                 val_size=val_size,
