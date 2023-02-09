@@ -90,6 +90,10 @@ class Statlayer(tf.keras.layers.Layer):
             model = ExponentialSmoothing(
                 y[1].values, seasonal_periods=self.seasonality, seasonal="add"
             )
+        else:
+            raise ValueError(
+                "Stat model not implemented. Available stat model: ets, tbats"
+            )
 
         if train:
             for date_time in self.train_window_list(y[1].index, val_size, nb_window):

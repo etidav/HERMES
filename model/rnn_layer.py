@@ -1,6 +1,4 @@
-import numpy as np
 import tensorflow as tf
-from model.utils import read_yaml
 from typing import List, Dict, Tuple
 
 
