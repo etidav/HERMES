@@ -20,7 +20,7 @@ random.seed(42)
 
 class hermes(tf.keras.Model):
     """
-    Class defining the a HERMES model.
+    Class defining a HERMES model.
     """
 
     def __init__(
@@ -53,7 +53,6 @@ class hermes(tf.keras.Model):
                     model_name is not None,
                     deep_model_config_path is not None,
                     input_model_config_path is not None,
-                    es_model is not None,
                     stat_model_name is not None,
                 ]
             ):
@@ -116,7 +115,7 @@ class hermes(tf.keras.Model):
 
     def call(self, inputs: Dict, training: bool = False) -> tf.Tensor:
         """
-        compute the (non-renormlazed) output of the HERMES model.
+        compute the (non-renormalized) output of the HERMES model.
         
         Arguments:
         
@@ -128,7 +127,7 @@ class hermes(tf.keras.Model):
         
         -*pred_windows*: a tf.Tensor with the output of the HERMES model
         """
-        values_X = inputs["trends"]
+        values_x = inputs["trends"]
 
         if training:
             input_windows = {}
@@ -147,9 +146,7 @@ class hermes(tf.keras.Model):
             for cont_input in self.deep_model.signature:
                 if cont_input == "trends":
                     input_window = self.make_moving_windows(
-                        trends=values_X,
-                        window=self.window,
-                        horizon=self.horizon,
+                        trends=values_x, window=self.window, horizon=self.horizon,
                     )
 
                     stat_preds = self.stat_model(inputs)
@@ -200,7 +197,7 @@ class hermes(tf.keras.Model):
             for cont_input in self.deep_model.signature:
                 if cont_input == "trends":
 
-                    input_window = values_X[:, -self.window :]
+                    input_window = values_x[:, -self.window :]
 
                     stat_preds = self.stat_model(inputs, inference=True)
 
@@ -249,7 +246,7 @@ class hermes(tf.keras.Model):
         
         - *y_signal*: a pd.DataFrame with one or multiple time series.
         - *external_signal*: a pd.DataFrame with the linked external signals
-        - *stat_model*: A dict gathering the statistical models already fiited. As the learning of the statistical models could be long, during a grid search, it could be useful to train only one time them and reload them at each new training of the HERMES model.
+        - *stat_model*: A dict gathering the statistical models already fitted. As the learning of the statistical models could be long, during a grid search, it could be useful to train only one time them and reload them at each new training of the HERMES model.
         - *date_time*: a date time indicating where to start the HERMES prediction (format YYYY-MM-DD)
         
         Returns:
@@ -271,17 +268,15 @@ class hermes(tf.keras.Model):
 
         if stat_model is not None:
             self.stat_model.stat_model = stat_model
-            
-        processes=os.cpu_count() - 2
+
+        processes = os.cpu_count() - 2
 
         if not self.stat_model.check_integrity(y_signal_train, train=False):
             self.stat_model.fit(y_signal_train, train=False, processes=processes)
         self.stat_model.compute_prediction(y_signal_train, train=False)
 
         inputs, trends_idx = self.sequences_to_model_inputs(
-            y_signal_train,
-            external_signal_train,
-            tf_dataset=False,
+            y_signal_train, external_signal_train, tf_dataset=False,
         )
 
         data = y_signal_train
@@ -335,7 +330,7 @@ class hermes(tf.keras.Model):
             range(len(y_signal.columns)), index=y_signal.columns, columns=["batch_idx"],
         )
         list_trends_name = list(y_signal.columns).copy()
-        
+
         if tf_dataset:
 
             random.shuffle(list_trends_name)
@@ -411,7 +406,7 @@ class hermes(tf.keras.Model):
     @tf.function
     def grad(self, inputs: Dict, val_size: int, nb_window: int) -> Dict:
         """
-        Compute the loss of the model and the correspond gradients
+        Compute model loss and the corresponding gradients
         
         Arguments:
 
@@ -472,7 +467,6 @@ class hermes(tf.keras.Model):
         nb_window: int,
         model_folder: str,
         early_stopping: int = None,
-        rnn_reducelr: int = None,
         rnn_optimizer: tf.keras.optimizers.Optimizer = None,
         nb_max_epoch: int = 20,
         return_last_ckpt: bool = True,
@@ -490,8 +484,7 @@ class hermes(tf.keras.Model):
         - *nb_window*: How many moving windows are used in the training process.
         - *model_folder*: str, where to store the final model and checkpoint
         - *early_stopping*: int, number of epoch without betterment before stop training
-        - *rnn_reducelr*: number of epoch without betterment before decrease the rnn_optimizer learning
-        - *rnn_optimizer*: tf.keras.optimizer use to updtate the RNN variables
+        - *rnn_optimizer*: tf.keras.optimizer use to update the RNN variables
         - *nb_max_epoch*:  max number of epoch during the training
         - *return_last_ckpt*: boolean to indicate if the weights of the best epoch are returned or if the weights of the last epoch are returned        
        """
@@ -522,7 +515,7 @@ class hermes(tf.keras.Model):
         if not self.stat_model.check_integrity(
             y_signal, val_size=val_size, nb_window=nb_window, train=True
         ):
-            processes=os.cpu_count() - 2
+            processes = os.cpu_count() - 2
             self.stat_model.fit(
                 y_signal,
                 val_size=val_size,
@@ -649,7 +642,6 @@ class hermes(tf.keras.Model):
         time_split = prediction.index[0]
         histo_ground_truth = ground_truth.loc[:time_split].iloc[:-1]
         ground_truth = ground_truth.loc[time_split:].iloc[: self.horizon]
-        
 
         if type(metrics) == str:
             metrics = [metrics]

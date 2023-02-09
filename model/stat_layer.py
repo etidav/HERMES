@@ -31,7 +31,7 @@ class Statlayer(tf.keras.layers.Layer):
         - *horizon*: Define the horizon of the forecast of the statistical model
         - *window*: Define the look back window the of HERMES model. usually equal to 1 of 2 time the seasonality
         - *stat_model_name*: name of the statistical model that will be used in the HERMES methode. Two statistical models are implemented for now: ['tbats', 'ets']
-        - *stat_model*: A dict gathering the statistical models already fiited. As the learning of the statistical models could be long, during a grid search, it could be useful to train only one time them and reload them at each new training of the HERMES model.
+        - *stat_model*: A dict gathering the statistical models already fited. As the learning of the statistical models could be long, during a grid search, it could be useful to train only one time them and reload them at each new training of the HERMES model.
         """
         super(Statlayer, self).__init__()
         self.seasonality = seasonality
