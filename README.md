@@ -28,7 +28,7 @@ To reproduce the result of HERMES on the sample of 100 time series:
 run
 ```bash
 python run/run_hermes.py --help # display the default parameters and their description
-python run/run_hermes.py --model_dir_tag hermes_100ts  # train 10 hermes with different seeds on the sample of 100 fashion time series and save the results in the dir result/
+python run/run_hermes.py --model_dir_tag hermes_100ts --load_pretrain_stat_model # train 10 hermes with different seeds on the sample of 100 fashion time series and save the results in the dir result/
 ```
 
 ## HERMES paper results on 100ts

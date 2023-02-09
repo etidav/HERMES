@@ -37,8 +37,10 @@ def main():
         "--stat_model_name", type=str, help="name of the statistical model. Two models already implemented: ['ets', 'tbats']", default='tbats'
     )
     parser.add_argument(
-        "--load_pretrain_stat_model", type=bool, help="Set to True if you want to load pretrained statistical models", default=True
+        "--nb_time_series", type=int, help="number of time series to use during the training. Three possibilities available to reproduce results of the HERMES paper: 100, 1000 or 10000", default=100
     )
+    parser.add_argument(
+        "--load_pretrain_stat_model", dest='load_pretrain_stat_model',  help="Set to True if you want to load pretrained statistical models", default=False, action='store_true')
     args = parser.parse_args()
     gpus = tf.config.list_physical_devices('GPU')
     if len(gpus):
@@ -47,8 +49,24 @@ def main():
                         gpus[0], [tf.config.LogicalDeviceConfiguration(memory_limit=7500)]
                     )
     
-    y_signal = pd.read_csv('/hermes/data/f1_main_100_sequences.csv', index_col=0)
-    external_signal = pd.read_csv('/hermes/data/f1_fashion_forward_100_sequences.csv', index_col=0)
+    nb_time_series = args.nb_time_series
+    if nb_time_series not in [100,1000,10000]:
+        raise ValueError(
+                    "Invalid number of time series. Provide a number of time series in [100,1000,10000]."
+                )
+    if nb_time_series == 100:
+        y_signal = pd.read_csv('/hermes/data/f1_main_100_sequences.csv', index_col=0)
+        external_signal = pd.read_csv('/hermes/data/f1_fashion_forward_100_sequences.csv', index_col=0)
+    elif nb_time_series == 1000:
+        y_signal = pd.read_csv('/hermes/data/f1_main_1000_sequences.csv', index_col=0)
+        external_signal = pd.read_csv('/hermes/data/f1_fashion_forward_1000_sequences.csv', index_col=0)
+    elif nb_time_series == 10000:
+        y_signal = pd.read_csv('/hermes/data/f1_main.csv', index_col=0)
+        external_signal = pd.read_csv('/hermes/data/f1_fashion_forward.csv', index_col=0)
+    else:
+        raise ValueError(
+                    "Invalid number of time series. Provide a number of time series in [100,1000,10000]."
+                )
     y_signal_train =  y_signal.iloc[:-52]
     external_signal_train =  external_signal.iloc[:-52]
     
@@ -66,12 +84,13 @@ def main():
     rnn_optimizer = tf.keras.optimizers.Adam(learning_rate=rnn_lr)
     
     load_pretrain_stat_model = args.load_pretrain_stat_model
-    pretrain_stat_model_train = read_pickle('/hermes/data/pretrain_stat_model/pretrain_stat_model_train.pkl')
-    pretrain_stat_model_test = read_pickle('/hermes/data/pretrain_stat_model/pretrain_stat_model_test.pkl')
+    if load_pretrain_stat_model:
+        pretrain_stat_model_train = read_pickle(f'/hermes/data/pretrain_stat_model/{nb_time_series}ts_pretrain_stat_model_train.pkl')
+        pretrain_stat_model_test = read_pickle(f'/hermes/data/pretrain_stat_model/{nb_time_series}ts_pretrain_stat_model_test.pkl')
     
     all_mase = []
     
-    for seed in range(10):
+    for seed in range(1):
         
         model_dir_tag = args.model_dir_tag + f'_seed{seed}'
         model_folder = os.path.join('/hermes/result/',model_dir_tag)
@@ -105,12 +124,13 @@ def main():
             rnn_optimizer=rnn_optimizer,
             nb_max_epoch=nb_max_epoch,
         )
+        write_pickle(model.stat_model.stat_model, os.path.join(model_folder,'pretrain_stat_model_train.pkl'))
 
         if load_pretrain_stat_model:
             model.stat_model.stat_model = pretrain_stat_model_test
 
         hermes_prediction, stat_model_prediction = model.predict(y_signal_train, external_signal_train)
-
+        write_pickle(model.stat_model.stat_model, os.path.join(model_folder,'pretrain_stat_model_test.pkl'))
 
         hermes_eval = model.evaluate(ground_truth=y_signal, prediction=hermes_prediction, metrics = ['mase'])
         stat_model_eval = model.evaluate(ground_truth=y_signal, prediction=stat_model_prediction, metrics = ['mase'])
