@@ -206,6 +206,10 @@ def main():
     print("HERMES final resul")
     print("mean ", np.mean(all_mase))
     print("std ", np.std(all_mase))
+    write_json(
+        {"hermes_mean": np.mean(all_mase), "hermes_std": np.std(all_mase)},
+        os.path.join("/hermes/result/", args.model_dir_tag + "_avg_final_result.json"),
+    )
 
 
 if __name__ == "__main__":
