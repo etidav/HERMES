@@ -2,17 +2,6 @@ import json
 import pickle
 import yaml
 
-
-def warn_unparsed(_dict, parsed_keys, config_file):
-    diff = set(_dict.keys()).difference(set(parsed_keys))
-    if diff:
-        logger.warning(f"Unparsed {diff} in file {config_file}")
-
-
-def raise_none_field(name, file):
-    raise ValueError("{} is None in file {}".format(name, file))
-
-
 def read_yaml(file):
     with open(file, "r") as f:
         return yaml.load(f, Loader=yaml.FullLoader)
