@@ -24,7 +24,7 @@ RUN pip3 install -r /requirements.txt && \
 
 # Make data and libs accressible
 COPY data /hermes/data
-RUN unzip /hermes/data/pretrain_stat_model/10000ts_pretrain_stat_model_train.zip
+RUN unzip /hermes/data/pretrain_stat_model/10000ts_pretrain_stat_model_train.zip -d /hermes/data/pretrain_stat_model
 RUN rm /hermes/data/pretrain_stat_model/10000ts_pretrain_stat_model_train.zip
 COPY run /hermes/run
 COPY model /hermes/model
