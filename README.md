@@ -28,7 +28,9 @@ To reproduce the result of HERMES on the sample of 100 time series:
 run
 ```bash
 python run/run_hermes.py --help # display the default parameters and their description
-python run/run_hermes.py --model_dir_tag hermes_100ts --load_pretrain_stat_model # train 10 hermes with different seeds on the sample of 100 fashion time series and save the results in the dir result/
+python run/run_hermes.py --model_dir_tag hermes_100ts --nb_time_series 100 --rnn_lr 0.001 --batch_size 8 --load_pretrain_stat_model # train 10 hermes with different seeds on the sample of 100 fashion time series and save the results in the dir result/
+python run/run_hermes.py --model_dir_tag hermes_1000ts --nb_time_series 1000 --rnn_lr 0.0005 --batch_size 64 --load_pretrain_stat_model # train 10 hermes with different seeds on the sample of 1000 fashion time series and save the results in the dir result/
+python run/run_hermes.py --model_dir_tag hermes_10000ts --nb_time_series 10000 --rnn_lr 0.001 --batch_size 64 --load_pretrain_stat_model # train 10 hermes with different seeds on the whole fashion time series and save the results in the dir result/
 ```
 
 ## HERMES paper results on 100ts
