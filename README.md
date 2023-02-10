@@ -36,9 +36,23 @@ python run/run_hermes.py --model_dir_tag hermes_100ts --load_pretrain_stat_model
 The following tabs summarize some results that can be reproduced with this code:
 
 
- - on SHMMES simulated sequences:
+ - Experience on 10000 time series:
 
 | Model         | Mase  mean  | Mase std    |
 | :-------------| :-----------| :-----------|
 | tbats         |    0.745    |    -        |
-| hermes-tbats  |    0.7368   |    0.004    |
+| hermes-tbats  |             |             |
+
+ - Experience on 1000 time series:
+
+| Model         | Mase  mean  | Mase std    |
+| :-------------| :-----------| :-----------|
+| tbats         |    0.734    |    -        |
+| hermes-tbats  |    0.7151   |    0.0035   |
+
+ - Experience on 100 time series:
+
+| Model         | Mase  mean  | Mase std    |
+| :-------------| :-----------| :-----------|
+| tbats         |    0.745    |    -        |
+| hermes-tbats  |    0.7368   |    0.0043   |
