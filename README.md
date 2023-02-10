@@ -40,21 +40,21 @@ The following tabs summarize some results that can be reproduced with this code:
 
  - Experience on 10000 time series:
 
-| Model         | Mase  mean  | Mase std    |
-| :-------------| :-----------| :-----------|
-| tbats         |    0.745    |    -        |
-| hermes-tbats  |             |             |
+| Model            | Mase  mean  | Mase std    |
+| :----------------| :-----------| :-----------|
+| tbats            |    0.745    |    -        |
+| hermes-tbats-ws  |             |             |
 
  - Experience on 1000 time series:
 
-| Model         | Mase  mean  | Mase std    |
-| :-------------| :-----------| :-----------|
-| tbats         |    0.734    |    -        |
-| hermes-tbats  |    0.7151   |    0.0035   |
+| Model            | Mase  mean  | Mase std    |
+| :----------------| :-----------| :-----------|
+| tbats            |    0.734    |    -        |
+| hermes-tbats-ws  |    0.7151   |    0.0035   |
 
  - Experience on 100 time series:
 
-| Model         | Mase  mean  | Mase std    |
-| :-------------| :-----------| :-----------|
-| tbats         |    0.745    |    -        |
-| hermes-tbats  |    0.7368   |    0.0043   |
+| Model            | Mase  mean  | Mase std    |
+| :----------------| :-----------| :-----------|
+| tbats            |    0.745    |    -        |
+| hermes-tbats-ws  |    0.7368   |    0.0043   |
