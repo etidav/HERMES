@@ -8,6 +8,7 @@ from typing import List, Dict, Tuple
 from tqdm import tqdm
 from model.utils import (
     read_json,
+    write_json,
     read_yaml,
     write_yaml,
 )
@@ -59,13 +60,16 @@ class hermes(tf.keras.Model):
                 raise RuntimeError(
                     "if you specify a model_folder, don't specify any others arguments. All are going to be instanciate with the model_folder."
                 )
-            config = read_json(os.path.join(model_folder, "config.json"))
             input_model_config_path = os.path.join(model_folder, "input_signature.yaml")
             deep_model_config_path = os.path.join(
                 model_folder, "deep_model_config.yaml"
             )
-            self.process_input_model_config(input_model_config_path)
+            config = read_json(os.path.join(model_folder, "config.json"))
+            self.input_model_config = read_yaml(input_model_config_path)
+            self.deep_model_config = read_yaml(deep_model_config_path)
             self.model_name = config["model_name"]
+            self.process_input_model_config()
+
             ref_model = hermes(
                 model_name=self.model_name,
                 deep_model_config_path=deep_model_config_path,
@@ -94,6 +98,7 @@ class hermes(tf.keras.Model):
             self.deep_model_config = read_yaml(deep_model_config_path)
             self.process_input_model_config()
             self.model_name = model_name
+            self.stat_model_name = stat_model_name
             self.deep_model, self.deep_model.signature = name_to_archi[self.model_name](
                 self.deep_model_config
             ).build(self.input_model_config)
@@ -101,7 +106,7 @@ class hermes(tf.keras.Model):
                 seasonality=self.seasonality,
                 window=self.window,
                 horizon=self.horizon,
-                stat_model_name=stat_model_name,
+                stat_model_name=self.stat_model_name,
                 stat_model=stat_model,
             )
 
@@ -502,6 +507,13 @@ class hermes(tf.keras.Model):
             write_yaml(
                 self.deep_model_config,
                 os.path.join(self.model_folder, "deep_model_config.yaml"),
+            )
+            write_json(
+                {
+                    "model_name": self.model_name,
+                    "stat_model_name": self.stat_model_name,
+                },
+                os.path.join(self.model_folder, "config.json"),
             )
 
         logdir = os.path.join(model_folder, "log/")

@@ -2,9 +2,10 @@ import json
 import pickle
 import yaml
 
+
 def read_yaml(file):
     with open(file, "r") as f:
-        return yaml.load(f, Loader=yaml.FullLoader)
+        return yaml.load(f, Loader=yaml.UnsafeLoader)
 
 
 def write_yaml(data, file):

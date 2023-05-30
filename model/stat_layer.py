@@ -3,6 +3,7 @@ import pandas as pd
 import tensorflow as tf
 from tbats import TBATS
 from statsmodels.tsa.api import ExponentialSmoothing
+from statsmodels.tsa.forecasting.theta import ThetaModel
 import multiprocessing
 from functools import partial
 from tqdm import tqdm
@@ -90,9 +91,12 @@ class Statlayer(tf.keras.layers.Layer):
             model = ExponentialSmoothing(
                 y[1].values, seasonal_periods=self.seasonality, seasonal="add"
             )
+        elif self.stat_model_name == "thetam":
+            model = ThetaModel(y[1].values, period=self.seasonality, method="add")
+            fitted_model = model.fit()
         else:
             raise ValueError(
-                "Stat model not implemented. Available stat model: ets, tbats"
+                "Stat model not implemented. Available stat model: ets, thetam, tbats"
             )
 
         if train:
@@ -115,6 +119,13 @@ class Statlayer(tf.keras.layers.Layer):
                             seasonal="add",
                         )
                         fitted_model = model.fit()
+                    elif self.stat_model_name == "thetam":
+                        model = ThetaModel(
+                            y[1].loc[:date_time].values,
+                            period=self.seasonality,
+                            method="add",
+                        )
+                        fitted_model = model.fit()
                     stat_model[y_name][date_time] = fitted_model
         else:
             date_time = y[1].index[-1]
@@ -132,6 +143,13 @@ class Statlayer(tf.keras.layers.Layer):
                         y[1].loc[:date_time].values,
                         seasonal_periods=self.seasonality,
                         seasonal="add",
+                    )
+                    fitted_model = model.fit()
+                elif self.stat_model_name == "thetam":
+                    model = ThetaModel(
+                        y[1].loc[:date_time].values,
+                        period=self.seasonality,
+                        method="add",
                     )
                     fitted_model = model.fit()
                 stat_model[y_name][date_time] = fitted_model
@@ -275,11 +293,15 @@ class Statlayer(tf.keras.layers.Layer):
 
             if train:
                 for date_time in y.index[self.window - 1 : -self.horizon]:
-                    all_stat_pred[date_time] = tf.constant(all_stat_pred[date_time])
+                    all_stat_pred[date_time] = tf.constant(
+                        all_stat_pred[date_time], dtype=tf.float64
+                    )
                 self.index_order = y.index[self.window - 1 : -self.horizon]
             else:
                 date_time = y.index[-1]
-                all_stat_pred[date_time] = tf.constant(all_stat_pred[date_time])
+                all_stat_pred[date_time] = tf.constant(
+                    all_stat_pred[date_time], dtype=tf.float64
+                )
                 self.index_order = [y.index[-1]]
 
             self.all_stat_pred = all_stat_pred

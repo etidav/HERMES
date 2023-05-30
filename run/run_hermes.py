@@ -68,6 +68,9 @@ def main():
         default=100,
     )
     parser.add_argument(
+        "--gpu", type=int, help="number of the gpu that will be used", default=0,
+    )
+    parser.add_argument(
         "--load_pretrain_stat_model",
         dest="load_pretrain_stat_model",
         help="Set to True if you want to load pretrained statistical models",
@@ -75,11 +78,12 @@ def main():
         action="store_true",
     )
     args = parser.parse_args()
+    gpu_number = args.gpu
     gpus = tf.config.list_physical_devices("GPU")
     if len(gpus):
-        tf.config.set_visible_devices(gpus[0], "GPU")
+        tf.config.set_visible_devices(gpus[gpu_number], "GPU")
         tf.config.set_logical_device_configuration(
-            gpus[0], [tf.config.LogicalDeviceConfiguration(memory_limit=7500)]
+            gpus[gpu_number], [tf.config.LogicalDeviceConfiguration(memory_limit=7500)]
         )
 
     nb_time_series = args.nb_time_series
